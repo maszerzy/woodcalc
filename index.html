@@ -100,7 +100,7 @@ button{margin-top:12px;padding:10px 14px;border-radius:10px;border:0;background:
 <div id="output" class="result" aria-live="polite"></div>
 
 <div class="footer-version">
-  Wersja 1.2 – Kalkulator ugięcia belki drewnianej
+  Wersja 1.3 – Kalkulator ugięcia belki drewnianej
 </div>
 
 <script>
@@ -113,6 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   const matSelect = document.getElementById('material');
+  const Einput = document.getElementById('E');
+  const MORinput = document.getElementById('MOR');
+
+  // Wypełnij select materiałami
   for (const key in materials) {
     const opt = document.createElement('option');
     opt.value = key;
@@ -120,12 +124,14 @@ document.addEventListener('DOMContentLoaded', function() {
     matSelect.appendChild(opt);
   }
 
-  matSelect.addEventListener('change', () => {
-    const m = materials[matSelect.value];
-    document.getElementById('E').value = m.E;
-    document.getElementById('MOR').value = m.MOR;
+  // Aktualizacja E i MOR po zmianie materiału
+  matSelect.addEventListener('change', function() {
+    const m = materials[this.value];
+    Einput.value = m.E;
+    MORinput.value = m.MOR;
   });
 
+  // Ustaw domyślny materiał
   matSelect.value = 'pine';
   matSelect.dispatchEvent(new Event('change'));
 
@@ -136,14 +142,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function M_point(P,L){return P*L/4;}
   function M_udl(w,L){return w*L*L/8;}
   function formatValue(val,style){
-    if(style==='eng') return val.toExponential(3);
-    else return val.toLocaleString('pl-PL',{maximumFractionDigits:2});
+    return style==='eng'? val.toExponential(3) : val.toLocaleString('pl-PL',{maximumFractionDigits:2});
   }
 
-  document.getElementById('calc').addEventListener('click',()=>{
+  document.getElementById('calc').addEventListener('click', function() {
     const L = Number(document.getElementById('L').value);
-    const E = Number(document.getElementById('E').value);
-    const MOR = Number(document.getElementById('MOR').value);
+    const E = Number(Einput.value);
+    const MOR = Number(MORinput.value);
     const b = Number(document.getElementById('b').value);
     const h = Number(document.getElementById('h').value);
     const d = Number(document.getElementById('d').value);
@@ -152,39 +157,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadUnit = document.getElementById('loadUnit').value;
     let P_or_w = Number(document.getElementById('P_or_w').value);
     const resultStyle = document.getElementById('resultStyle').value;
-    if (loadUnit === 'kg') P_or_w *= 9.81;
+    if(loadUnit==='kg') P_or_w *= 9.81;
 
-    let I=0, c=0, sectionDesc='';
-    if(section==='rect'){I=I_rect(b,h); c=h/2; sectionDesc=`Prostokątny ${b}×${h} mm`;}
-    else{I=I_circle(d); c=d/2; sectionDesc=`Kołowy Ø${d} mm`;}
+    let I=0,c=0,desc='';
+    if(section==='rect'){I=I_rect(b,h); c=h/2; desc=`Prostokątny ${b}×${h} mm`;}
+    else{I=I_circle(d); c=d/2; desc=`Kołowy Ø${d} mm`;}
 
-    let delta=0, Mmax=0;
+    let delta=0,Mmax=0;
     if(loadType==='point'){delta=defl_point(P_or_w,L,E,I); Mmax=M_point(P_or_w,L);}
     else{delta=defl_udl(P_or_w,L,E,I); Mmax=M_udl(P_or_w,L);}
 
-    const sigma = Mmax*c/I;
-    const M_break = MOR*I/c;
-    let P_break, w_break;
-    if(loadType==='point') P_break = 4*M_break/L;
-    else w_break = 8*M_break/(L*L);
+    const sigma=Mmax*c/I;
+    const M_break=MOR*I/c;
+    let P_break,w_break;
+    if(loadType==='point') P_break=4*M_break/L;
+    else w_break=8*M_break/(L*L);
 
-    const fosStrength = loadType==='point'? (P_break/P_or_w) : (w_break/P_or_w);
+    const fos=loadType==='point'? P_break/P_or_w : w_break/P_or_w;
 
     let html='<strong>Wyniki</strong><ul>';
-    html+=`<li>Przekrój: ${sectionDesc}</li>`;
+    html+=`<li>Przekrój: ${desc}</li>`;
     html+=`<li>I (moment bezwładności) = ${formatValue(I,resultStyle)} mm^4</li>`;
     html+=`<li>δ (ugięcie max) = ${formatValue(delta,resultStyle)} mm</li>`;
-    html+=`<li>M_max (moment zginający) = ${formatValue(Mmax,resultStyle)} N·mm</li>`;
-    html+=`<li>σ (naprężenie) = ${formatValue(sigma,resultStyle)} MPa</li>`;
+    html+=`<li>M_max = ${formatValue(Mmax,resultStyle)} N·mm</li>`;
+    html+=`<li>σ = ${formatValue(sigma,resultStyle)} MPa</li>`;
     if(loadType==='point'){
-      if(resultStyle==='nat'){
-        const P_kg = P_break/9.81;
-        html+=`<li>P_break (obciążenie niszczące) ≈ ${formatValue(P_kg,resultStyle)} kg</li>`;
-      } else {
-        html+=`<li>P_break (siła niszcząca) ≈ ${formatValue(P_break,resultStyle)} N</li>`;
-      }
+      html+=resultStyle==='nat' ? `<li>P_break ≈ ${formatValue(P_break/9.81,resultStyle)} kg</li>` : `<li>P_break ≈ ${formatValue(P_break,resultStyle)} N</li>`;
     } else {
-      html+=`<li>w_break (obc. równomierne niszczące) ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
+      html+=`<li>w_break ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
     }
-    html+=`<li>FoS (współczynnik bezpieczeństwa) ≈ ${formatValue(fosStrength,resultStyle)}</li>`;
-    html+='</ul><div class="note">Legenda: I – sztywność przekroju, δ – ugięcie, M_max – maksymalny moment, σ – naprężenie, P_break/w_break – obciążenie niszczące, FoS – współczynnik bezpieczeń
+    html+=`<li>FoS ≈ ${formatValue(fos,resultStyle)}</li>`;
+    html+='</ul
