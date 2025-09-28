@@ -168,8 +168,18 @@ document.getElementById('calc').addEventListener('click',()=>{
   html+=`<li>δ (ugięcie max) = ${formatValue(delta,resultStyle)} mm</li>`;
   html+=`<li>M_max (moment zginający) = ${formatValue(Mmax,resultStyle)} N·mm</li>`;
   html+=`<li>σ (naprężenie) = ${formatValue(sigma,resultStyle)} MPa</li>`;
-  if(loadType==='point') html+=`<li>P_break (siła niszcząca) ≈ ${formatValue(P_break,resultStyle)} N</li>`;
-  else html+=`<li>w_break (obc. równomierne niszczące) ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
+  
+  if(loadType==='point'){
+    if(resultStyle==='nat'){
+      const P_kg = P_break/9.81;
+      html+=`<li>P_break (obciążenie niszczące) ≈ ${formatValue(P_kg,resultStyle)} kg</li>`;
+    } else {
+      html+=`<li>P_break (siła niszcząca) ≈ ${formatValue(P_break,resultStyle)} N</li>`;
+    }
+  } else {
+    html+=`<li>w_break (obc. równomierne niszczące) ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
+  }
+
   html+=`<li>FoS (współczynnik bezpieczeństwa) ≈ ${formatValue(fosStrength,resultStyle)}</li>`;
   html+='</ul><div class="note">Legenda: I – sztywność przekroju, δ – ugięcie, M_max – maksymalny moment, σ – naprężenie, P_break/w_break – obciążenie niszczące, FoS – współczynnik bezpieczeństwa.</div>';
   document.getElementById('output').innerHTML=html;
@@ -179,10 +189,4 @@ document.getElementById('exportCSV').addEventListener('click',()=>{
   const out=document.getElementById('output').innerText;
   const blob=new Blob([out],{type:'text/csv'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='beam_results.csv';
-  a.click();
-});
-</script>
-</body>
-</html>
+  a.href=
