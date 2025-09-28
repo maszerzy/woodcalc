@@ -104,7 +104,7 @@ button{margin-top:12px;padding:10px 14px;border-radius:10px;border:0;background:
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+window.onload = function() {
   const materials = {
     pine:{name:"Sosna",E:10000,MOR:40},
     oak:{name:"Dąb",E:11000,MOR:70},
@@ -116,25 +116,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const Einput = document.getElementById('E');
   const MORinput = document.getElementById('MOR');
 
-  // Wypełnij select materiałami
-  for (const key in materials) {
+  // wypełnij select materiałami
+  for(const key in materials){
     const opt = document.createElement('option');
     opt.value = key;
     opt.textContent = materials[key].name;
     matSelect.appendChild(opt);
   }
 
-  // Aktualizacja E i MOR po zmianie materiału
-  matSelect.addEventListener('change', function() {
+  // event zmiany materiału
+  matSelect.addEventListener('change', function(){
     const m = materials[this.value];
     Einput.value = m.E;
     MORinput.value = m.MOR;
   });
 
-  // Ustaw domyślny materiał
-  matSelect.value = 'pine';
+  // ustaw domyślny materiał
+  matSelect.value='pine';
   matSelect.dispatchEvent(new Event('change'));
 
+  // funkcje obliczeniowe
   function I_rect(b,h){return b*Math.pow(h,3)/12;}
   function I_circle(d){return Math.PI*Math.pow(d,4)/64;}
   function defl_point(P,L,E,I){return P*Math.pow(L,3)/(48*E*I);}
@@ -145,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return style==='eng'? val.toExponential(3) : val.toLocaleString('pl-PL',{maximumFractionDigits:2});
   }
 
-  document.getElementById('calc').addEventListener('click', function() {
+  document.getElementById('calc').addEventListener('click', function(){
     const L = Number(document.getElementById('L').value);
     const E = Number(Einput.value);
     const MOR = Number(MORinput.value);
@@ -170,21 +171,4 @@ document.addEventListener('DOMContentLoaded', function() {
     const sigma=Mmax*c/I;
     const M_break=MOR*I/c;
     let P_break,w_break;
-    if(loadType==='point') P_break=4*M_break/L;
-    else w_break=8*M_break/(L*L);
-
-    const fos=loadType==='point'? P_break/P_or_w : w_break/P_or_w;
-
-    let html='<strong>Wyniki</strong><ul>';
-    html+=`<li>Przekrój: ${desc}</li>`;
-    html+=`<li>I (moment bezwładności) = ${formatValue(I,resultStyle)} mm^4</li>`;
-    html+=`<li>δ (ugięcie max) = ${formatValue(delta,resultStyle)} mm</li>`;
-    html+=`<li>M_max = ${formatValue(Mmax,resultStyle)} N·mm</li>`;
-    html+=`<li>σ = ${formatValue(sigma,resultStyle)} MPa</li>`;
-    if(loadType==='point'){
-      html+=resultStyle==='nat' ? `<li>P_break ≈ ${formatValue(P_break/9.81,resultStyle)} kg</li>` : `<li>P_break ≈ ${formatValue(P_break,resultStyle)} N</li>`;
-    } else {
-      html+=`<li>w_break ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
-    }
-    html+=`<li>FoS ≈ ${formatValue(fos,resultStyle)}</li>`;
-    html+='</ul
+    if(loadType==='point') P_break=
