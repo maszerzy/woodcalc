@@ -1,195 +1,188 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kalkulator ugięcia belki drewnianej</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;padding:24px;background:#f6f7fb;color:#111}
-    .container{max-width:1000px;margin:0 auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(20,30,60,0.08)}
-    h1{font-size:22px;margin:0 0 12px}
-    label{display:block;margin-top:10px;font-size:13px}
-    input,select{width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:8px}
-    .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-    .result{background:#f3f6ff;padding:12px;border-radius:8px;margin-top:14px}
-    button{margin-top:12px;padding:10px 14px;border-radius:10px;border:0;background:#2b6cff;color:white;cursor:pointer}
-    small{color:#555}
-    .note{font-size:13px;color:#444;margin-top:8px}
-    canvas{max-width:100%;margin-top:14px;background:#fff;border:1px solid #ddd;border-radius:8px}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalkulator ugięcia belki drewnianej</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;padding:24px;background:#f6f7fb;color:#111}
+.container{max-width:1000px;margin:0 auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(20,30,60,0.08)}
+h1{font-size:22px;margin:0 0 12px}
+label{display:block;margin-top:10px;font-size:13px}
+input,select{width:100%;padding:8px;margin-top:6px;border:1px solid #ddd;border-radius:8px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.result{background:#f3f6ff;padding:12px;border-radius:8px;margin-top:14px}
+button{margin-top:12px;padding:10px 14px;border-radius:10px;border:0;background:#2b6cff;color:white;cursor:pointer}
+small{color:#555}
+.note{font-size:13px;color:#444;margin-top:8px}
+canvas{max-width:100%;margin-top:14px;background:#fff;border:1px solid #ddd;border-radius:8px}
+.tooltip-icon{cursor:help;color:#2b6cff;margin-left:4px}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Kalkulator ugięcia belki drewnianej</h1>
-    <p class="note">Założenia: belka swobodnie podparta. Obsługiwane obciążenia: siła skupiona w środku lub obciążenie równomierne. Przekroje: prostokątny, kołowy. Wartości w jednostkach SI.</p>
+<div class="container">
+<h1>Kalkulator ugięcia belki drewnianej</h1>
+<p class="note">Założenia: belka swobodnie podparta. Obsługiwane obciążenia: siła skupiona w środku lub obciążenie równomierne. Przekroje: prostokątny, kołowy. Wartości w jednostkach SI.</p>
 
-    <div class="row">
-      <div>
-        <label>Długość belki L (mm)</label>
-        <input id="L" type="number" value="2000" />
-      </div>
-      <div>
-        <label>Materiał (E, MOR)</label>
-        <select id="material"></select>
-      </div>
-      <div>
-        <label>Moduł Younga E (MPa)</label>
-        <input id="E" type="number" />
-      </div>
-      <div>
-        <label>Moduł łu (MOR) (MPa)</label>
-        <input id="MOR" type="number" />
-      </div>
-
-      <div>
-        <label>Typ przekroju</label>
-        <select id="sectionType">
-          <option value="rect">Prostokątny</option>
-          <option value="circle">Kołowy</option>
-        </select>
-      </div>
-      <div>
-        <label>Szerokość b (mm) [dla prostokątnego]</label>
-        <input id="b" type="number" value="100" />
-      </div>
-      <div>
-        <label>Wysokość h (mm) [dla prostokątnego]</label>
-        <input id="h" type="number" value="200" />
-      </div>
-      <div>
-        <label>Średnica d (mm) [dla kołowego]</label>
-        <input id="d" type="number" value="150" />
-      </div>
-
-      <div>
-        <label>Typ obciążenia</label>
-        <select id="loadType">
-          <option value="point">Siła skupiona w środku (P)</option>
-          <option value="udl">Obciążenie równomierne (w) [N/mm]</option>
-        </select>
-      </div>
-      <div>
-        <label>Wielkość obciążenia (P w N lub w w N/mm)</label>
-        <input id="P_or_w" type="number" value="1000" />
-      </div>
-      <div>
-        <label>Współczynnik bezpieczeństwa (FoS)</label>
-        <input id="fos" type="number" value="2" />
-      </div>
-    </div>
-
-    <button id="calc">Oblicz</button>
-    <button id="exportCSV">Eksport CSV</button>
-
-    <div id="output" class="result" aria-live="polite"></div>
-    <canvas id="chart" width="800" height="200"></canvas>
-
-    <h3>Instrukcja uruchomienia na GitHub Pages</h3>
-    <ol>
-      <li>Utwórz repozytorium na GitHub (np. "beam-calc").</li>
-      <li>Wgraj ten plik jako <code>index.html</code>.</li>
-      <li>Włącz Pages w ustawieniach (branch main, katalog root).</li>
-      <li>Strona dostępna będzie pod adresem <code>https://twoja-nazwa.github.io/nazwa-repo/</code>.</li>
-    </ol>
+<div class="row">
+  <div>
+    <label>Długość belki L (mm)</label>
+    <input id="L" type="number" value="2000" />
   </div>
+  <div>
+    <label>Materiał (E, MOR)</label>
+    <select id="material"></select>
+  </div>
+  <div>
+    <label>Moduł Younga E (MPa)
+      <span class="tooltip-icon" title="Określa sztywność materiału. Im wyższy E, tym mniejsze ugięcie belki.">ℹ️</span>
+    </label>
+    <input id="E" type="number" />
+  </div>
+  <div>
+    <label>Moduł łu (MOR) (MPa)
+      <span class="tooltip-icon" title="Wytrzymałość drewna na zginanie. Określa obciążenie, przy którym belka pęka.">ℹ️</span>
+    </label>
+    <input id="MOR" type="number" />
+  </div>
+  <div>
+    <label>Typ przekroju</label>
+    <select id="sectionType">
+      <option value="rect">Prostokątny</option>
+      <option value="circle">Kołowy</option>
+    </select>
+  </div>
+  <div>
+    <label>Szerokość b (mm) [prostokąt]</label>
+    <input id="b" type="number" value="100" />
+  </div>
+  <div>
+    <label>Wysokość h (mm) [prostokąt]</label>
+    <input id="h" type="number" value="200" />
+  </div>
+  <div>
+    <label>Średnica d (mm) [kołowy]</label>
+    <input id="d" type="number" value="150" />
+  </div>
+  <div>
+    <label>Typ obciążenia</label>
+    <select id="loadType">
+      <option value="point">Siła skupiona w środku (P)</option>
+      <option value="udl">Obciążenie równomierne (w) [N/mm]</option>
+    </select>
+  </div>
+  <div>
+    <label>Wielkość obciążenia</label>
+    <input id="P_or_w" type="number" value="100" />
+  </div>
+  <div>
+    <label>Jednostka obciążenia</label>
+    <select id="loadUnit">
+      <option value="N">N</option>
+      <option value="kg">kg</option>
+    </select>
+  </div>
+  <div>
+    <label>Współczynnik bezpieczeństwa (FoS)</label>
+    <input id="fos" type="number" value="2" />
+  </div>
+  <div>
+    <label>Styl wyników</label>
+    <select id="resultStyle">
+      <option value="eng">Inżynierski</option>
+      <option value="nat">Naturalny</option>
+    </select>
+  </div>
+</div>
+
+<button id="calc">Oblicz</button>
+<button id="exportCSV">Eksport CSV</button>
+
+<div id="output" class="result" aria-live="polite"></div>
 
 <script>
-  const materials = {
-    pine: {name:"Sosna",E:10000,MOR:40},
-    oak: {name:"Dąb",E:11000,MOR:70},
-    spruce: {name:"Świerk",E:9500,MOR:35},
-    beech: {name:"Buk",E:13000,MOR:80}
-  }
-  const matSelect=document.getElementById('material')
-  for(const k in materials){
-    const opt=document.createElement('option')
-    opt.value=k;opt.textContent=materials[k].name
-    matSelect.appendChild(opt)
-  }
-  matSelect.addEventListener('change',e=>{
-    const m=materials[e.target.value]
-    document.getElementById('E').value=m.E
-    document.getElementById('MOR').value=m.MOR
-  })
-  matSelect.value='pine'
-  matSelect.dispatchEvent(new Event('change'))
+const materials = {
+  pine:{name:"Sosna",E:10000,MOR:40},
+  oak:{name:"Dąb",E:11000,MOR:70},
+  spruce:{name:"Świerk",E:9500,MOR:35},
+  beech:{name:"Buk",E:13000,MOR:80}
+};
+const matSelect=document.getElementById('material');
+for(const k in materials){
+  const opt=document.createElement('option');
+  opt.value=k; opt.textContent=materials[k].name;
+  matSelect.appendChild(opt);
+}
+matSelect.addEventListener('change',e=>{
+  const m=materials[e.target.value];
+  document.getElementById('E').value=m.E;
+  document.getElementById('MOR').value=m.MOR;
+});
+matSelect.value='pine';
+matSelect.dispatchEvent(new Event('change'));
 
-  function I_rect(b,h){return b*Math.pow(h,3)/12}
-  function I_circle(d){return Math.PI*Math.pow(d,4)/64}
+function I_rect(b,h){return b*Math.pow(h,3)/12;}
+function I_circle(d){return Math.PI*Math.pow(d,4)/64;}
+function defl_point(P,L,E,I){return P*Math.pow(L,3)/(48*E*I);}
+function defl_udl(w,L,E,I){return w*Math.pow(L,4)/(384*E*I);}
+function M_point(P,L){return P*L/4;}
+function M_udl(w,L){return w*L*L/8;}
+function formatValue(val,style){
+  if(style==='eng') return val.toExponential(3);
+  else return val.toLocaleString('pl-PL',{maximumFractionDigits:2});
+}
 
-  function defl_point(P,L,E,I){return P*Math.pow(L,3)/(48*E*I)}
-  function defl_udl(w,L,E,I){return w*Math.pow(L,4)/(384*E*I)}
-  function M_point(P,L){return P*L/4}
-  function M_udl(w,L){return w*L*L/8}
+document.getElementById('calc').addEventListener('click',()=>{
+  const L=Number(window.L.value);
+  const E=Number(document.getElementById('E').value);
+  const MOR=Number(document.getElementById('MOR').value);
+  const b=Number(document.getElementById('b').value);
+  const h=Number(document.getElementById('h').value);
+  const d=Number(document.getElementById('d').value);
+  const section=document.getElementById('sectionType').value;
+  const loadType=document.getElementById('loadType').value;
+  const loadUnit=document.getElementById('loadUnit').value;
+  let P_or_w=Number(document.getElementById('P_or_w').value);
+  const resultStyle=document.getElementById('resultStyle').value;
+  if(loadUnit==='kg') P_or_w*=9.81;
 
-  document.getElementById('calc').addEventListener('click',()=>{
-    const L=Number(window.L.value)
-    const E=Number(document.getElementById('E').value)
-    const MOR=Number(document.getElementById('MOR').value)
-    const b=Number(document.getElementById('b').value)
-    const h=Number(document.getElementById('h').value)
-    const d=Number(document.getElementById('d').value)
-    const section=document.getElementById('sectionType').value
-    const loadType=document.getElementById('loadType').value
-    const P_or_w=Number(document.getElementById('P_or_w').value)
+  let I=0,c=0,sectionDesc='';
+  if(section==='rect'){I=I_rect(b,h); c=h/2; sectionDesc=`Prostokątny ${b}×${h} mm`;}
+  else{I=I_circle(d); c=d/2; sectionDesc=`Kołowy Ø${d} mm`;}
 
-    let I=0,c=0
-    if(section==='rect'){I=I_rect(b,h);c=h/2}
-    else{I=I_circle(d);c=d/2}
+  let delta=0,Mmax=0;
+  if(loadType==='point'){delta=defl_point(P_or_w,L,E,I); Mmax=M_point(P_or_w,L);}
+  else{delta=defl_udl(P_or_w,L,E,I); Mmax=M_udl(P_or_w,L);}
 
-    let delta=0,Mmax=0
-    if(loadType==='point'){delta=defl_point(P_or_w,L,E,I);Mmax=M_point(P_or_w,L)}
-    else{delta=defl_udl(P_or_w,L,E,I);Mmax=M_udl(P_or_w,L)}
+  const sigma=Mmax*c/I;
+  const M_break=MOR*I/c;
+  let P_break,w_break;
+  if(loadType==='point') P_break=4*M_break/L;
+  else w_break=8*M_break/(L*L);
 
-    const sigma=Mmax*c/I
-    const M_break=MOR*I/c
-    let P_break,w_break
-    if(loadType==='point'){P_break=4*M_break/L}
-    else{w_break=8*M_break/(L*L)}
+  let fosStrength= loadType==='point'? (P_break/P_or_w):(w_break/P_or_w);
 
-    let fosStrength= loadType==='point'? (P_break/P_or_w): (w_break/P_or_w)
+  let html='<strong>Wyniki</strong><ul>';
+  html+=`<li>Przekrój: ${sectionDesc}</li>`;
+  html+=`<li>I (moment bezwładności) = ${formatValue(I,resultStyle)} mm^4</li>`;
+  html+=`<li>δ (ugięcie max) = ${formatValue(delta,resultStyle)} mm</li>`;
+  html+=`<li>M_max (moment zginający) = ${formatValue(Mmax,resultStyle)} N·mm</li>`;
+  html+=`<li>σ (naprężenie) = ${formatValue(sigma,resultStyle)} MPa</li>`;
+  if(loadType==='point') html+=`<li>P_break (siła niszcząca) ≈ ${formatValue(P_break,resultStyle)} N</li>`;
+  else html+=`<li>w_break (obc. równomierne niszczące) ≈ ${formatValue(w_break,resultStyle)} N/mm</li>`;
+  html+=`<li>FoS (współczynnik bezpieczeństwa) ≈ ${formatValue(fosStrength,resultStyle)}</li>`;
+  html+='</ul><div class="note">Legenda: I – sztywność przekroju, δ – ugięcie, M_max – maksymalny moment, σ – naprężenie, P_break/w_break – obciążenie niszczące, FoS – współczynnik bezpieczeństwa.</div>';
+  document.getElementById('output').innerHTML=html;
+});
 
-    let html='<strong>Wyniki</strong><ul>'
-    html+=`<li>I = ${I.toExponential(4)} mm^4</li>`
-    html+=`<li>δ = ${delta.toExponential(4)} mm</li>`
-    html+=`<li>M_max = ${Mmax.toExponential(4)} N·mm</li>`
-    html+=`<li>σ = ${sigma.toExponential(4)} MPa</li>`
-    if(loadType==='point')html+=`<li>P_break ≈ ${P_break.toExponential(4)} N</li>`
-    else html+=`<li>w_break ≈ ${w_break.toExponential(4)} N/mm</li>`
-    html+=`<li>FoS (wytrzymałość) ≈ ${fosStrength.toExponential(3)}</li>`
-    html+='</ul><div class="note">Wyniki orientacyjne, należy weryfikować z normami.</div>'
-    document.getElementById('output').innerHTML=html
-
-    // wykres ugięcia
-    const ctx=document.getElementById('chart').getContext('2d')
-    ctx.clearRect(0,0,800,200)
-    ctx.beginPath();ctx.moveTo(0,100)
-    const n=50
-    for(let i=0;i<=n;i++){
-      const x=L*i/n
-      let y=0
-      if(loadType==='point'){
-        const P=P_or_w
-        const a=L/2;const b=L-a
-        if(x<=a)y=(P*b*x/(6*L*E*I))*(Math.pow(L,2)-Math.pow(b,2)-Math.pow(x,2))
-        else y=(P*a*(L-x)/(6*L*E*I))*(Math.pow(L,2)-Math.pow(a,2)-Math.pow(L-x,2))
-      } else {
-        const w=P_or_w
-        y=(w*x*(Math.pow(L,3)-2*L*Math.pow(x,2)+Math.pow(x,3)))/(24*E*I)
-      }
-      ctx.lineTo(i/n*800,100+50*(y/delta))
-    }
-    ctx.strokeStyle="#2b6cff";ctx.stroke()
-  })
-
-  document.getElementById('exportCSV').addEventListener('click',()=>{
-    const out=document.getElementById('output').innerText
-    const blob=new Blob([out],{type:'text/csv'})
-    const a=document.createElement('a')
-    a.href=URL.createObjectURL(blob)
-    a.download='beam_results.csv'
-    a.click()
-  })
+document.getElementById('exportCSV').addEventListener('click',()=>{
+  const out=document.getElementById('output').innerText;
+  const blob=new Blob([out],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='beam_results.csv';
+  a.click();
+});
 </script>
 </body>
 </html>
